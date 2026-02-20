@@ -262,5 +262,159 @@
 
 ---
 
-*Updated: 2026-02-20 by Antigravity (AI Agent)*
-*Created by ClassAI Development Team*
+## 7. 배포 (Deployment)
+
+### 7.1. GitHub 리포지토리
+*   **URL:** https://github.com/bignine99/ai_class.git
+*   **브랜치:** `main`
+*   **커밋 메시지:** `Initial commit: ClassAI - Mankiw Economics Platform (Dashboard, Syllabus, Search, Practice, Exam, Lecture, Report with Assignment/Grading)`
+*   **커밋 파일 수:** 25개
+*   **.gitignore 제외 항목:**
+    *   `.raw_db/` — 원본 PDF 파일 (용량 큼, 저작권)
+    *   `rag/chroma_db/` — ChromaDB 벡터 데이터
+    *   `rag/data/` — 텍스트 추출 데이터 (재생성 가능)
+    *   `.env` — API 키 등 민감 정보
+
+### 7.2. Vercel 프로덕션 배포
+*   **프로젝트명:** `260219_ai_class`
+*   **프로덕션 URL:** https://260219aiclass-n7bf1omy6-danny-chos-projects.vercel.app
+*   **배포 방식:** 정적 사이트 호스팅 (빌드 불필요)
+*   **라우팅 설정 (`vercel.json`):**
+    *   루트 URL(`/`) → `landing.html`로 리다이렉트
+    *   캐시 정책: `must-revalidate` (항상 최신 콘텐츠 제공)
+*   **자동 배포:** GitHub `main` 브랜치와 연결됨 — `git push`만으로 자동 배포
+
+---
+
+## 8. RAG 아키텍처 제약사항 및 기능별 영향 분석
+
+### 8.1. 현재 구조적 한계
+
+```
+[Vercel 프런트엔드]  ──→  localhost:5000  ──→  ❌ RAG 서버 없음
+     (클라우드)              (사용자 로컬)
+```
+
+*   `rag_client.js`가 `localhost:5000`으로 API를 호출하는 구조.
+*   Vercel은 **정적 호스팅** 전용이므로 Python 백엔드 서버를 실행할 수 없음.
+*   따라서 RAG 서버가 필요한 AI 기능은 **Vercel 배포 환경에서 작동하지 않음**.
+*   단, 로컬 환경에서 `python rag/server.py`를 실행하면 모든 기능 사용 가능.
+
+### 8.2. 기능별 Vercel 배포 환경 영향
+
+| 기능 | RAG 의존 | Vercel 작동 | 비고 |
+|------|----------|-------------|------|
+| 랜딩 페이지 | ❌ | ✅ 정상 | 완전한 정적 페이지 |
+| 대시보드 (index) | ❌ | ✅ 정상 | `data.js` 기반 |
+| 강의계획서 (syllabus) | ❌ | ✅ 정상 | 템플릿 기반 생성 |
+| 챕터 검색 (search) | ❌ | ✅ 정상 | `data.js` 기반 |
+| 연습문제 (practice) | ❌ | ✅ 정상 | `data.js` 기반 |
+| 시험 생성 (exam) | 🔶 선택 | ⚠️ 기본만 | AI 생성 시 RAG 필요 |
+| 강의자료 (lecture) | ✅ 필요 | ❌ 불가 | AI 생성 기능 |
+| 보고서/과제 (report) | ✅ 필요 | ❌ 불가 | AI 생성/채점 기능 |
+| AI 채팅 | ✅ 필요 | ❌ 불가 | Gemini API 연동 |
+
+### 8.3. 향후 RAG 클라우드 운영 방안
+
+| 방법 | 난이도 | 비용 | 적합 시나리오 |
+|------|--------|------|--------------|
+| **Vercel Serverless Functions** (Python) | 중 | 무료~저가 | 단순 API 프록시 |
+| **Railway / Render** (Python 서버) | 중 | 월 $5~10 | 소규모 운영 |
+| **Google Cloud Run** | 중상 | 종량제 | 대규모/안정적 운영 |
+| **Gemini API 직접 호출** (서버 없이) | 하 | API 비용만 | 가장 현실적 (현재 API Key 입력 구조 활용) |
+
+---
+
+## 9. 최종 프로젝트 산출물
+
+### 9.1. 파일 구조
+
+```
+260219_ai_class/
+├── landing.html            # 랜딩 페이지 (진입점)
+├── index.html              # 대시보드
+├── syllabus.html           # 강의계획서 생성기 ★ NEW
+├── search.html             # 챕터 검색
+├── practice.html           # 연습문제
+├── exam.html               # 시험 생성
+├── lecture.html             # 강의자료 생성
+├── report.html             # 보고서·과제 관리 (3탭) ★ REDESIGN
+├── vercel.json             # Vercel 배포 설정
+├── .gitignore              # Git 제외 규칙
+├── development_modification_processes.md  # 본 문서
+├── program_instruction.md  # 프로그램 기획 문서
+│
+├── css/
+│   ├── style.css           # 메인 스타일시트 (다크/라이트 테마)
+│   └── landing.css         # 랜딩 페이지 전용 스타일
+│
+├── js/
+│   ├── data.js             # 교과서 데이터 (36챕터, 10파트)
+│   ├── common.js           # 공통 유틸리티, 네비게이션, 테마
+│   ├── key_manager.js      # Gemini API 키 관리
+│   ├── rag_client.js       # RAG 서버 통신 클라이언트
+│   ├── report_app.js       # 보고서·과제 관리 로직 ★ NEW
+│   └── syllabus_app.js     # 강의계획서 생성 로직 ★ NEW
+│
+├── img/
+│   └── textbook_cover.jpg  # 교과서 표지 이미지
+│
+├── rag/                    # RAG 백엔드 (로컬 전용)
+│   ├── server.py           # API 서버 (HTTP, localhost:5000)
+│   └── pipeline.py         # PDF 추출 → ChromaDB 파이프라인
+│
+└── .raw_db/                # 원본 PDF 10권 (Git 제외)
+```
+
+### 9.2. 페이지별 기능 요약
+
+| 페이지 | 주요 기능 | 기술 |
+|--------|-----------|------|
+| **Landing** | 히어로 섹션, 3D 책 표지, 로고 마키, AI 튜터 챗봇 | CSS Animation, JS |
+| **Dashboard** | 강좌 개요, 챕터 네비게이션, 학습 진도 | data.js |
+| **Syllabus** | PDF 업로드(최대 10개), 16주 계획서 자동 생성, 인라인 편집, 인쇄/다운로드 | JS Template |
+| **Search** | 챕터별 검색, 키워드 하이라이팅 | data.js |
+| **Practice** | 객관식/주관식 연습문제, 정답 확인 | data.js |
+| **Exam** | 시험지 자동 생성, 난이도·범위 설정 | data.js + RAG |
+| **Lecture** | 강의자료 AI 생성 | RAG + Gemini |
+| **Report** | 보고서 작성 / 과제 생성(6유형) / 과제 채점(4항목) | JS + RAG |
+
+### 9.3. 기술 스택
+
+| 분류 | 기술 |
+|------|------|
+| **프런트엔드** | HTML5, CSS3 (Glassmorphism, Dark/Light Theme), Vanilla JavaScript |
+| **아이콘** | FontAwesome 6.4.0 |
+| **백엔드 (로컬)** | Python 3.x, HTTPServer |
+| **AI/LLM** | Google Gemini 2.0 Flash, text-embedding-004 |
+| **벡터 DB** | ChromaDB (Persistent) |
+| **배포** | GitHub + Vercel (정적 사이트) |
+
+---
+
+## 10. 프로젝트 종료
+
+### 10.1. 프로젝트 상태: ✅ 시범 적용 완료
+
+*   **개발 기간:** 2026-02-19 ~ 2026-02-20 (2일)
+*   **프로젝트 성격:** 시범 적용 (Pilot)
+*   **배포 환경:** Vercel (정적 호스팅) + GitHub (소스 관리)
+*   **운영 방침:**
+    *   현재 단계에서는 RAG 서버 없이 정적 기능만으로 운영.
+    *   실제 사용자 수요가 확인되면 클라우드 RAG 서버 배포 및 Syllabus PDF 분석 기능 본격 개발.
+
+### 10.2. 향후 작업 트리거
+
+| 트리거 | 작업 내용 | 예상 소요 |
+|--------|-----------|-----------|
+| 사용자 수요 확인 | Syllabus RAG 파이프라인 개발 (섹션 6) | 1~2주 |
+| 클라우드 운영 결정 | RAG 서버 클라우드 배포 (섹션 8.3) | 2~3일 |
+| 과제 채점 실사용 요청 | Gemini API 연동 실제 채점 엔진 구현 | 3~5일 |
+| AI 채팅 고도화 | RAG 컨텍스트 기반 대화 시스템 | 3~5일 |
+
+---
+
+*Final Update: 2026-02-20 13:51 KST*
+*Author: Antigravity (AI Agent)*
+*Project: ClassAI - Mankiw's Principles of Economics Platform*
+*Status: PILOT COMPLETE*
