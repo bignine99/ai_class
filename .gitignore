@@ -1,0 +1,35 @@
+# ── 환경 변수 / 민감 정보 ──
+.env
+.env.local
+.env.*.local
+
+# ── API 키 관련 ──
+**/api_key*.txt
+**/secrets*/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+
+# ── ChromaDB (용량 큼) ──
+rag/chroma_db/
+
+# ── RAG 추출 데이터 (재생성 가능) ──
+rag/data/
+
+# ── 원본 PDF (용량 큼, 저작권) ──
+.raw_db/
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo

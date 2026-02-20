@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="맨큐의 경제학 - 강의자료 만들기. 챕터별 강의노트와 발표자료를 생성하세요.">
+  <title>강의자료 만들기 | 맨큐의 경제학</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function () {
+      const t = localStorage.getItem('mankiw_theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="main-content">
+    <div class="page-container">
+      <div class="page-header">
+        <h1>강의자료 만들기</h1>
+        <p>챕터 내용을 기반으로 강의노트, 수업 진행표, 토론 주제를 생성합니다</p>
+      </div>
+
+      <div class="two-column-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="sidebar-title">챕터 선택</div>
+          <div class="chapter-list" id="chapterSidebar"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-panel" id="contentPanel">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-state-icon">—</div>
+            <div class="empty-state-title">챕터를 선택하세요</div>
+            <div class="empty-state-desc">왼쪽에서 챕터를 선택하면 강의자료가 자동으로 생성됩니다.</div>
+          </div>
+          <div id="lectureContent" class="hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/key_manager.js"></script>
+  <script src="js/rag_client.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // Navbar & Footer handled automatically by common.js
+
+    let currentChapter = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof createChapterSidebar === 'function') {
+        createChapterSidebar('chapterSidebar', handleChapterSelect, currentChapter);
+      }
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('chapter')) {
+        handleChapterSelect(parseInt(urlParams.get('chapter')));
+      } else {
+        handleChapterSelect(1); // Default to Ch.1
+      }
+    });
+
+    function handleChapterSelect(chapterId) {
+      currentChapter = chapterId;
+      const chapter = getChapter(chapterId);
+      if (!chapter) return;
+
+      document.querySelectorAll('#chapterSidebar button').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.chapter) === chapterId);
+      });
+
+      document.getElementById('emptyState').classList.add('hidden');
+      const contentDiv = document.getElementById('lectureContent');
+      contentDiv.classList.remove('hidden');
+
+      // Generate lecture materials
+      const lectureData = generateLectureMaterial(chapter);
+
+      contentDiv.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">
+              Part ${chapter.partId} · Chapter ${chapter.id} · ${chapter.pages}쪽
+            </div>
+            <h2 style="margin-bottom: 0;">${chapter.title}</h2>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="printContent('lectureOutput')">인쇄</button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadLecture(${chapter.id})">다운로드</button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" id="lectureTabs">
+          <button class="tab-btn active" data-tab="tab-overview">수업 개요</button>
+          <button class="tab-btn" data-tab="tab-notes">강의 노트</button>
+          <button class="tab-btn" data-tab="tab-slides">슬라이드 구성</button>
+          <button class="tab-btn" data-tab="tab-discussion">토론 주제</button>
+        </div>
+
+        <div id="lectureOutput">
+          <!-- Tab: Overview -->
+          <div class="tab-content active" id="tab-overview">
+            ${renderOverview(chapter, lectureData)}
+          </div>
+
+          <!-- Tab: Notes -->
+          <div class="tab-content" id="tab-notes">
+            ${renderLectureNotes(chapter, lectureData)}
+          </div>
+
+          <!-- Tab: Slides -->
+          <div class="tab-content" id="tab-slides">
+            ${renderSlideOutline(chapter, lectureData)}
+          </div>
+
+          <!-- Tab: Discussion -->
+          <div class="tab-content" id="tab-discussion">
+            ${renderDiscussionTopics(chapter, lectureData)}
+          </div>
+        </div>
+      `;
+
+      initTabs('lectureTabs');
+    }
+
+    function generateLectureMaterial(chapter) {
+      return {
+        duration: '75분 (50분 강의 + 25분 토론/연습)',
+        objectives: [
+          `${chapter.title}의 핵심 개념을 설명할 수 있다`,
+          `${chapter.keywords.slice(0, 3).join(', ')}을(를) 이해하고 구분할 수 있다`,
+          `관련 경제 현상에 ${chapter.title}의 원리를 적용할 수 있다`,
+          `실생활 사례를 통해 이론의 현실적 의미를 파악할 수 있다`
+        ],
+        outline: [
+          { time: '0-5분', activity: '도입: 이전 수업 리뷰 및 동기 부여', detail: `지난 강의 핵심 내용 복습 후, 오늘의 주제 "${chapter.title}"에 대한 흥미로운 사례나 질문으로 시작` },
+          { time: '5-20분', activity: `핵심 개념 1: ${chapter.keywords[0]} 개념 소개`, detail: `정의, 원리, 그래프를 활용한 설명` },
+          { time: '20-35분', activity: `핵심 개념 2: ${chapter.keywords[1] || '심화 이론'} 분석`, detail: '이론적 근거와 수학적/그래프적 표현' },
+          { time: '35-45분', activity: '사례 연구 및 응용', detail: '실생활 경제 현상에 이론 적용, 뉴스 기사 분석' },
+          { time: '45-55분', activity: '연습문제 풀이', detail: '교과서 예제 및 추가 문제를 통한 이해도 확인' },
+          { time: '55-70분', activity: '토론 및 Q&A', detail: '학생 질문 응답 및 토론 주제 논의' },
+          { time: '70-75분', activity: '정리 및 과제 안내', detail: '핵심 내용 요약, 다음 수업 예고, 과제 배부' }
+        ]
+      };
+    }
+
+    function renderOverview(chapter, data) {
+      return `
+        <div class="output-panel">
+          <div class="output-header">
+            <span class="output-header-title">수업 개요</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">${data.duration}</span>
+          </div>
+          <div class="output-body">
+            <h3 style="color: var(--primary-400); margin-top: 0;">학습 목표</h3>
+            <ol style="padding-left: 1.2rem; margin-bottom: 1.5rem;">
+              ${data.objectives.map(obj => `<li style="margin-bottom: 6px; color: var(--text-secondary); font-size:0.9rem;">${obj}</li>`).join('')}
+            </ol>
+
+            <h3 style="color: var(--primary-400);">수업 진행표</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--border-light);">
+                  <th style="padding: 10px; text-align: left; color: var(--text-tertiary); width: 100px;">시간</th>
+                  <th style="padding: 10px; text-align: left; color: var(--text-tertiary); width: 200px;">활동</th>
+                  <th style="padding: 10px; text-align: left; color: var(--text-tertiary);">세부 내용</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.outline.map(item => `
+                  <tr style="border-bottom: 1px solid var(--border-subtle);">
+                    <td style="padding: 10px; font-family: 'JetBrains Mono', monospace; color: var(--primary-400); font-size: 0.8rem;">${item.time}</td>
+                    <td style="padding: 10px; font-weight: 500;">${item.activity}</td>
+                    <td style="padding: 10px; color: var(--text-secondary);">${item.detail}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+
+            <h3 style="color: var(--primary-400); margin-top: 1.5rem;">사전 준비물</h3>
+            <ul style="padding-left: 1.2rem; color: var(--text-secondary); font-size: 0.9rem;">
+              <li>교과서 ${chapter.pages}쪽 읽어오기</li>
+              <li>이전 장 핵심 개념 복습</li>
+              <li>관련 경제 뉴스 기사 1건 스크랩</li>
+            </ul>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLectureNotes(chapter, data) {
+      return `
+        <div class="output-panel">
+          <div class="output-header">
+            <span class="output-header-title">강의 노트</span>
+          </div>
+          <div class="output-body" id="lectureNotesBody">
+            <h2 style="border-bottom: 2px solid var(--primary-500); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+              Chapter ${chapter.id}. ${chapter.title}
+            </h2>
+            
+            <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+              <strong style="color: var(--primary-400);">챕터 요약</strong>
+              <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">${chapter.summary}</p>
+            </div>
+
+            <h3 style="color: var(--primary-400);">핵심 키워드</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem;">
+              ${chapter.keywords.map(k => `<span class="tag tag-blue">${k}</span>`).join('')}
+            </div>
+
+            ${chapter.concepts && chapter.concepts.length > 0 ? `
+              <h3 style="color: var(--primary-400);">주요 개념 설명</h3>
+              ${chapter.concepts.map((c, i) => `
+                <div style="background: var(--bg-tertiary); border-left: 3px solid var(--primary-500); padding: 1rem 1.25rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-bottom: 10px;">
+                  <div style="font-weight: 700; color: var(--primary-400); margin-bottom: 4px;">
+                    ${i + 1}. ${c.name}
+                  </div>
+                  <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    ${c.desc}
+                  </div>
+                </div>
+              `).join('')}
+            ` : ''}
+
+            <h3 style="color: var(--primary-400); margin-top: 1.5rem;">판서 계획</h3>
+            <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: var(--radius-md); border: 1px dashed var(--border-light);">
+              <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                <strong>칠판 왼쪽:</strong> 핵심 정의 및 공식<br>
+                <strong>칠판 중앙:</strong> 그래프 및 도표<br>
+                <strong>칠판 오른쪽:</strong> 예제 풀이 및 사례
+              </div>
+            </div>
+
+            <h3 style="color: var(--primary-400); margin-top: 1.5rem;">참고 자료</h3>
+            <ul style="padding-left: 1.2rem; color: var(--text-secondary); font-size: 0.9rem;">
+              <li>맨큐의 경제학 제10판 ${chapter.pages}쪽</li>
+              <li>관련 경제 통계 (한국은행, 통계청)</li>
+              <li>최근 관련 경제 뉴스 기사</li>
+            </ul>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSlideOutline(chapter, data) {
+      const slides = [
+        { title: '표지', content: `Chapter ${chapter.id}. ${chapter.title}\nPart ${chapter.partId}. ${chapter.partTitle}` },
+        { title: '학습 목표', content: data.objectives.join('\n') },
+        { title: '이전 수업 복습', content: '지난 시간에 배운 내용 간단 리뷰\n핵심 개념 3가지 질문' },
+        ...chapter.concepts.map((c, i) => ({
+          title: `핵심 개념 ${i + 1}: ${c.name}`,
+          content: `정의: ${c.desc}\n\n예시와 그래프를 포함한 설명`
+        })),
+        { title: '실생활 사례 분석', content: `${chapter.title} 관련 실제 경제 사례\n뉴스 기사 또는 데이터 분석` },
+        { title: '연습문제', content: '교과서 연습문제 풀이\n추가 응용 문제' },
+        { title: '토론 시간', content: '주제에 대한 찬반 토론\n학생 질의응답' },
+        { title: '정리 및 과제', content: `오늘의 핵심: ${chapter.keywords.slice(0, 3).join(', ')}\n과제: 교재 ${chapter.pages}쪽 복습 및 문제풀이` }
+      ];
+
+      return `
+        <div class="output-panel">
+          <div class="output-header">
+            <span class="output-header-title">슬라이드 구성안 (${slides.length}장)</span>
+          </div>
+          <div class="output-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+              ${slides.map((slide, i) => `
+                <div style="background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; position: relative;">
+                  <div style="position: absolute; top: 8px; right: 12px; font-size: 0.65rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+                    Slide ${i + 1}/${slides.length}
+                  </div>
+                  <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--primary-400);">
+                    ${slide.title}
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); white-space: pre-line; line-height: 1.6;">
+                    ${slide.content}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDiscussionTopics(chapter, data) {
+      const topics = generateDiscussionTopics(chapter);
+      return `
+        <div class="output-panel">
+          <div class="output-header">
+            <span class="output-header-title">토론 주제 및 활동</span>
+          </div>
+          <div class="output-body">
+            ${topics.map((topic, i) => `
+              <div class="question-card" style="margin-bottom: 1rem;">
+                <div class="question-header">
+                  <div class="question-number" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">${i + 1}</div>
+                  <span class="tag tag-blue">${topic.type}</span>
+                </div>
+                <div class="question-text" style="font-size: 1.05rem; font-weight: 600;">${topic.title}</div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.75rem;">${topic.description}</p>
+                <div style="background: var(--bg-tertiary); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-tertiary);">
+                  <strong>진행 방법:</strong> ${topic.method}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function generateDiscussionTopics(chapter) {
+      const topicTemplates = [
+        {
+          type: '찬반 토론',
+          title: `${chapter.keywords[0]}에 대한 정부 개입은 정당한가?`,
+          description: `${chapter.title}에서 다루는 ${chapter.keywords[0]} 개념을 바탕으로, 정부의 시장 개입이 효율적인가에 대해 토론합니다.`,
+          method: '학생을 찬성/반대 그룹으로 나누어 5분간 그룹 토의 후 대표 발표'
+        },
+        {
+          type: '사례 분석',
+          title: `${chapter.title} 현실 경제 사례 찾기`,
+          description: `오늘 배운 이론이 실제 경제에서 어떻게 나타나는지 최근 뉴스나 경제 데이터에서 사례를 찾아 발표합니다.`,
+          method: '3-4인 조별 활동, 스마트폰으로 관련 뉴스 검색 후 5분 내 발표'
+        },
+        {
+          type: '시사 연결',
+          title: `한국 경제에서 ${chapter.keywords[Math.min(1, chapter.keywords.length - 1)]}의 의미`,
+          description: `한국 경제의 현안과 ${chapter.title}의 이론을 연결하여 분석해봅니다.`,
+          method: '개인별 1분 발표, 전체 토론 5분'
+        }
+      ];
+
+      if (chapter.concepts && chapter.concepts.length > 0) {
+        topicTemplates.push({
+          type: '개념 비교',
+          title: `${chapter.concepts[0].name} vs ${chapter.concepts.length > 1 ? chapter.concepts[1].name : '관련 개념'} 비교`,
+          description: `두 핵심 개념의 차이점과 유사점을 정리하고, 각각이 적용되는 상황을 구분합니다.`,
+          method: '짝 활동으로 비교표 작성 후 전체 공유'
+        });
+      }
+
+      return topicTemplates;
+    }
+
+    function downloadLecture(chapterId) {
+      const chapter = getChapter(chapterId);
+      const data = generateLectureMaterial(chapter);
+
+      let text = `맨큐의 경제학 - 강의자료\n${'='.repeat(50)}\n`;
+      text += `Chapter ${chapter.id}. ${chapter.title}\n`;
+      text += `Part ${chapter.partId}. ${chapter.partTitle}\n`;
+      text += `교재 ${chapter.pages}쪽\n\n`;
+
+      text += `학습 목표\n${'-'.repeat(30)}\n`;
+      data.objectives.forEach((obj, i) => text += `${i + 1}. ${obj}\n`);
+
+      text += `\n수업 진행표\n${'-'.repeat(30)}\n`;
+      data.outline.forEach(item => text += `[${item.time}] ${item.activity}\n  → ${item.detail}\n`);
+
+      text += `\n핵심 키워드: ${chapter.keywords.join(', ')}\n`;
+
+      if (chapter.concepts.length > 0) {
+        text += `\n주요 개념\n${'-'.repeat(30)}\n`;
+        chapter.concepts.forEach((c, i) => text += `${i + 1}. ${c.name}: ${c.desc}\n`);
+      }
+
+      downloadAsText(text, `강의자료_Ch${chapter.id}_${chapter.title}.txt`);
+      showToast('강의자료가 다운로드되었습니다.', 'success');
+    }
+  </script>
+</body>
+
+</html>

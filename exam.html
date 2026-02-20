@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="맨큐의 경제학 - 시험문제 자동 생성. 범위와 유형을 선택하여 모의시험을 만들어보세요.">
+    <title>시험문제 내기 | 맨큐의 경제학</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        (function () {
+            const t = localStorage.getItem('mankiw_theme') ||
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="main-content">
+        <div class="page-container">
+            <div class="page-header">
+                <h1>시험문제 내기</h1>
+                <p>시험 범위와 유형을 설정하여 모의 시험문제를 자동으로 생성합니다</p>
+            </div>
+
+            <!-- Settings Panel -->
+            <div class="settings-panel" id="settingsPanel">
+                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">시험 설정</h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    <!-- Exam Range -->
+                    <div class="form-group">
+                        <label class="form-label">시험 범위</label>
+                        <select class="form-select" id="examRange" onchange="updateChapterSelection()">
+                            <option value="midterm">중간고사 (Ch.1 ~ Ch.17)</option>
+                            <option value="final">기말고사 (Ch.18 ~ Ch.36)</option>
+                            <option value="custom">직접 선택</option>
+                            <option value="all">전체 범위</option>
+                        </select>
+                    </div>
+
+                    <!-- Question Count -->
+                    <div class="form-group">
+                        <label class="form-label">문제 수</label>
+                        <select class="form-select" id="questionCount">
+                            <option value="5">5문제</option>
+                            <option value="10" selected>10문제</option>
+                            <option value="15">15문제</option>
+                            <option value="20">20문제</option>
+                            <option value="25">25문제</option>
+                        </select>
+                    </div>
+
+                    <!-- Difficulty -->
+                    <div class="form-group">
+                        <label class="form-label">난이도</label>
+                        <select class="form-select" id="difficulty">
+                            <option value="easy">쉬움 (기본 개념)</option>
+                            <option value="medium" selected>보통 (응용)</option>
+                            <option value="hard">어려움 (심화)</option>
+                            <option value="mixed">혼합</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Question Types -->
+                <div class="form-group mt-3">
+                    <label class="form-label">문제 유형</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+                        <label class="form-check">
+                            <input type="checkbox" value="multiple" checked>
+                            <span class="form-check-label">객관식</span>
+                        </label>
+                        <label class="form-check">
+                            <input type="checkbox" value="tf" checked>
+                            <span class="form-check-label">참/거짓</span>
+                        </label>
+                        <label class="form-check">
+                            <input type="checkbox" value="short" checked>
+                            <span class="form-check-label">단답형</span>
+                        </label>
+                        <label class="form-check">
+                            <input type="checkbox" value="essay">
+                            <span class="form-check-label">서술형</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Custom Chapter Selection -->
+                <div class="form-group mt-2 hidden" id="customChaptersSection">
+                    <label class="form-label">챕터 선택</label>
+                    <div id="chapterCheckboxes"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button class="btn btn-primary btn-lg" onclick="generateExam()">
+                        시험문제 생성하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- Generated Exam -->
+            <div id="examContainer" class="hidden">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                    <div>
+                        <h2 id="examTitle" style="font-size: 1.3rem; font-weight: 700;"></h2>
+                        <p id="examInfo" style="color: var(--text-tertiary); font-size: 0.85rem;"></p>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="toggleSettings()">설정</button>
+                        <button class="btn btn-secondary btn-sm" onclick="printExam()">인쇄</button>
+                        <button class="btn btn-secondary btn-sm" onclick="downloadExam()">다운로드</button>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="settings-panel"
+                    style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span
+                            style="font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">T</span>
+                        <div>
+                            <div
+                                style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">
+                                남은 시간</div>
+                            <div id="timer"
+                                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--primary-400);">
+                                --:--</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-sm btn-secondary" id="timerToggle" onclick="toggleTimer()">▶ 시작</button>
+                        <select class="form-select" id="timerDuration" style="width: auto; padding: 6px 32px 6px 12px;"
+                            onchange="resetTimer()">
+                            <option value="30">30분</option>
+                            <option value="45">45분</option>
+                            <option value="60" selected>60분</option>
+                            <option value="90">90분</option>
+                            <option value="120">120분</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="progress-bar mb-2">
+                    <div class="progress-bar-fill" id="examProgressBar" style="width: 0%"></div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem;" id="examProgressText">
+                    0% 완료
+                </div>
+
+                <div id="examQuestions"></div>
+
+                <div style="text-align: center; margin-top: 2rem; display: flex; gap: 12px; justify-content: center;">
+                    <button class="btn btn-primary btn-lg" id="examSubmitBtn" onclick="submitExam()">
+                        시험 제출하기
+                    </button>
+                    <button class="btn btn-secondary btn-lg" onclick="showAnswerKey()">
+                        정답 확인하기
+                    </button>
+                </div>
+
+                <div id="examScoreDisplay" class="hidden mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/key_manager.js"></script>
+    <script src="js/rag_client.js"></script>
+    <script src="js/common.js"></script>
+    <script>
+        // Navbar & Footer handled automatically by common.js
+
+        let examQuestions = [];
+        let examAnswers = {};
+        let examSubmitted = false;
+        let timerInterval = null;
+        let timerSeconds = 3600;
+        let timerRunning = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof getAllChapters !== 'function') {
+                console.error('Missing getAllChapters function in common.js');
+                return;
+            }
+            buildChapterCheckboxes();
+        });
+
+        // Build chapter checkboxes
+        function buildChapterCheckboxes() {
+            const container = document.getElementById('chapterCheckboxes');
+            const allChapters = getAllChapters();
+
+            if (!container) return;
+
+            container.innerHTML = allChapters.map(ch => `
+        <label class="form-check" style="padding: 4px 0; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" value="${ch.id}" class="chapter-cb" style="margin:0;">
+          <span class="form-check-label" style="font-size: 0.85rem; color:var(--text-secondary);">
+            Ch.${ch.id} ${ch.title}
+          </span>
+        </label>
+      `).join('');
+        }
+
+        function updateChapterSelection() {
+            const range = document.getElementById('examRange').value;
+            const customSection = document.getElementById('customChaptersSection');
+            customSection.classList.toggle('hidden', range !== 'custom');
+
+            if (range !== 'custom') {
+                const cbs = document.querySelectorAll('.chapter-cb');
+                cbs.forEach(cb => {
+                    const chId = parseInt(cb.value);
+                    if (range === 'midterm') cb.checked = chId >= 1 && chId <= 17;
+                    else if (range === 'final') cb.checked = chId >= 18 && chId <= 36;
+                    else if (range === 'all') cb.checked = true;
+                });
+            }
+        }
+        updateChapterSelection();
+
+        function getSelectedChapters() {
+            const range = document.getElementById('examRange').value;
+            if (range === 'midterm') return Array.from({ length: 17 }, (_, i) => i + 1);
+            if (range === 'final') return Array.from({ length: 19 }, (_, i) => i + 18);
+            if (range === 'all') return Array.from({ length: 36 }, (_, i) => i + 1);
+            return Array.from(document.querySelectorAll('.chapter-cb:checked')).map(cb => parseInt(cb.value));
+        }
+
+        function getSelectedTypes() {
+            return Array.from(document.querySelectorAll('.form-check input[type="checkbox"]:checked'))
+                .map(cb => cb.value)
+                .filter(v => ['multiple', 'tf', 'short', 'essay'].includes(v));
+        }
+
+        function generateExam() {
+            const chapters = getSelectedChapters();
+            const count = parseInt(document.getElementById('questionCount').value);
+            const types = getSelectedTypes();
+            const difficulty = document.getElementById('difficulty').value;
+
+            if (chapters.length === 0) {
+                showToast('시험 범위에서 최소 1개 챕터를 선택해주세요.', 'error');
+                return;
+            }
+            if (types.length === 0) {
+                showToast('문제 유형을 최소 1개 선택해주세요.', 'error');
+                return;
+            }
+
+            examQuestions = generateExamQuestions(chapters, count, types);
+            examAnswers = {};
+            examSubmitted = false;
+
+            if (examQuestions.length === 0) {
+                showToast('선택한 범위에서 문제를 찾을 수 없습니다. 범위를 넓혀 주세요.', 'error');
+                return;
+            }
+
+            // Build exam UI
+            const rangeLabel = document.getElementById('examRange').selectedOptions[0].text;
+            document.getElementById('examTitle').textContent = `모의 시험 - ${rangeLabel}`;
+            document.getElementById('examInfo').textContent =
+                `${examQuestions.length}문제 · ${types.map(t => ({ multiple: '객관식', tf: '참/거짓', short: '단답형', essay: '서술형' }[t])).join(', ')} · ${new Date().toLocaleDateString('ko-KR')}`;
+
+            const container = document.getElementById('examQuestions');
+            container.innerHTML = examQuestions.map((q, idx) => renderExamQuestion(q, idx)).join('');
+
+            document.getElementById('settingsPanel').classList.add('hidden');
+            document.getElementById('examContainer').classList.remove('hidden');
+            document.getElementById('examScoreDisplay').classList.add('hidden');
+
+            // Reset timer
+            resetTimer();
+            showToast(`${examQuestions.length}문제가 생성되었습니다!`, 'success');
+        }
+
+        function renderExamQuestion(q, index) {
+            const markers = ['①', '②', '③', '④', '⑤'];
+            const typeLabels = { multiple: '객관식', tf: '참/거짓', short: '단답형' };
+            const ch = getChapter(q.chapterId);
+
+            let body = '';
+            if (q.type === 'multiple') {
+                body = `
+          <div class="answer-options" id="exam-options-${index}">
+            ${q.options.map((opt, i) => `
+              <div class="answer-option" data-qidx="${index}" data-value="${i}" onclick="selectExamAnswer(${index}, ${i}, 'multiple')">
+                <span class="answer-option-marker">${markers[i]}</span>
+                <span>${opt}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+            } else if (q.type === 'tf') {
+                body = `
+          <div class="answer-options" id="exam-options-${index}" style="flex-direction: row; gap: 12px;">
+            <div class="answer-option" data-qidx="${index}" data-value="true" onclick="selectExamAnswer(${index}, true, 'tf')" style="flex: 1; justify-content: center;">
+              <span style="font-size: 1.1rem; font-weight: 700;">O</span> <span>참</span>
+            </div>
+            <div class="answer-option" data-qidx="${index}" data-value="false" onclick="selectExamAnswer(${index}, false, 'tf')" style="flex: 1; justify-content: center;">
+              <span style="font-size: 1.1rem; font-weight: 700;">X</span> <span>거짓</span>
+            </div>
+          </div>
+        `;
+            } else if (q.type === 'short') {
+                body = `<input type="text" class="form-input" placeholder="답을 입력하세요" oninput="selectExamAnswer(${index}, this.value, 'short')" style="max-width: 400px;">`;
+            }
+
+            return `
+        <div class="question-card" id="exam-q-${index}">
+          <div class="question-header">
+            <div class="question-number">${index + 1}</div>
+            <span class="question-type ${q.type}">${typeLabels[q.type] || q.type}</span>
+            <span style="margin-left: auto; font-size: 0.7rem; color: var(--text-muted);">Ch.${q.chapterId} ${ch ? ch.title : ''}</span>
+          </div>
+          <div class="question-text">${q.question}</div>
+          ${body}
+          <div id="exam-result-${index}" class="hidden"></div>
+        </div>
+      `;
+        }
+
+        function selectExamAnswer(qIdx, value, type) {
+            if (examSubmitted) return;
+            examAnswers[qIdx] = { value, type };
+
+            if (type === 'multiple' || type === 'tf') {
+                const options = document.querySelectorAll(`[data-qidx="${qIdx}"]`);
+                options.forEach(opt => {
+                    opt.classList.toggle('selected', String(opt.dataset.value) === String(value));
+                });
+            }
+
+            const pct = Math.round((Object.keys(examAnswers).length / examQuestions.length) * 100);
+            document.getElementById('examProgressBar').style.width = pct + '%';
+            document.getElementById('examProgressText').textContent = `${pct}% 완료 (${Object.keys(examAnswers).length}/${examQuestions.length})`;
+        }
+
+        function submitExam() {
+            if (examSubmitted) return;
+            if (Object.keys(examAnswers).length < examQuestions.length) {
+                if (!confirm(`아직 ${examQuestions.length - Object.keys(examAnswers).length}문제를 풀지 않았습니다. 제출하시겠습니까?`)) return;
+            }
+            examSubmitted = true;
+            stopTimer();
+            showAnswerKey();
+        }
+
+        function showAnswerKey() {
+            let correct = 0;
+            examQuestions.forEach((q, idx) => {
+                const userAnswer = examAnswers[idx];
+                const resultDiv = document.getElementById(`exam-result-${idx}`);
+                resultDiv.classList.remove('hidden');
+
+                let isCorrect = false;
+                if (q.type === 'multiple') isCorrect = userAnswer && userAnswer.value === q.answer;
+                else if (q.type === 'tf') isCorrect = userAnswer && userAnswer.value === q.answer;
+                else if (q.type === 'short') isCorrect = userAnswer && userAnswer.value.trim() === q.answer;
+
+                if (isCorrect) correct++;
+
+                // Visual feedback
+                if (q.type === 'multiple') {
+                    document.querySelectorAll(`[data-qidx="${idx}"]`).forEach((opt, i) => {
+                        opt.classList.remove('selected');
+                        if (i === q.answer) opt.classList.add('correct');
+                        else if (userAnswer && i === userAnswer.value && !isCorrect) opt.classList.add('wrong');
+                    });
+                } else if (q.type === 'tf') {
+                    document.querySelectorAll(`[data-qidx="${idx}"]`).forEach(opt => {
+                        opt.classList.remove('selected');
+                        if (String(opt.dataset.value) === String(q.answer)) opt.classList.add('correct');
+                        else if (userAnswer && String(opt.dataset.value) === String(userAnswer.value) && !isCorrect) opt.classList.add('wrong');
+                    });
+                }
+
+                resultDiv.innerHTML = `
+          <div class="result-box ${isCorrect ? 'correct' : userAnswer ? 'incorrect' : 'info'}">
+            <strong>${isCorrect ? 'CORRECT — 정답!' : userAnswer ? 'WRONG — 오답' : 'N/A — 미답변'}</strong>
+            ${q.type === 'short' ? `<br>정답: <strong>${q.answer}</strong>` : ''}
+            <br><br>${q.explanation}
+          </div>
+        `;
+            });
+
+            const total = examQuestions.length;
+            const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+            const scoreDiv = document.getElementById('examScoreDisplay');
+            scoreDiv.classList.remove('hidden');
+            scoreDiv.innerHTML = `
+        <div class="score-display">
+          <div class="score-circle" style="--score-deg: ${(pct / 100) * 360}deg;">
+            <div class="score-value">${pct}점</div>
+            <div class="score-total">${correct} / ${total}</div>
+          </div>
+          <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
+            ${pct >= 90 ? 'Outstanding!' : pct >= 80 ? 'Excellent!' : pct >= 70 ? 'Good!' : pct >= 60 ? 'Pass' : 'Need More Study'}
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1rem;">
+            <button class="btn btn-primary" onclick="location.reload()">새 시험 만들기</button>
+            <button class="btn btn-secondary" onclick="printExam()">인쇄</button>
+          </div>
+        </div>
+      `;
+            scoreDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            examSubmitted = true;
+        }
+
+        // Timer
+        function resetTimer() {
+            stopTimer();
+            timerSeconds = parseInt(document.getElementById('timerDuration').value) * 60;
+            updateTimerDisplay();
+            document.getElementById('timerToggle').textContent = '▶ 시작';
+            timerRunning = false;
+        }
+
+        function toggleTimer() {
+            if (timerRunning) stopTimer();
+            else startTimer();
+        }
+
+        function startTimer() {
+            timerRunning = true;
+            document.getElementById('timerToggle').textContent = '⏸ 일시정지';
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+                if (timerSeconds <= 0) {
+                    stopTimer();
+                    showToast('시간이 종료되었습니다!', 'error');
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            document.getElementById('timerToggle').textContent = '▶ 시작';
+        }
+
+        function updateTimerDisplay() {
+            const min = Math.floor(timerSeconds / 60);
+            const sec = timerSeconds % 60;
+            const display = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+            document.getElementById('timer').textContent = display;
+            if (timerSeconds <= 300) {
+                document.getElementById('timer').style.color = 'var(--accent-rose)';
+            }
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('hidden');
+        }
+
+        function printExam() {
+            const content = document.getElementById('examQuestions');
+            if (!content) return;
+            printContent('examQuestions');
+        }
+
+        function downloadExam() {
+            let text = `맨큐의 경제학 - 모의 시험\n${'='.repeat(50)}\n`;
+            text += `생성일: ${new Date().toLocaleDateString('ko-KR')}\n\n`;
+
+            examQuestions.forEach((q, idx) => {
+                const ch = getChapter(q.chapterId);
+                text += `${idx + 1}. [Ch.${q.chapterId} ${ch ? ch.title : ''}] ${q.question}\n`;
+                if (q.type === 'multiple') {
+                    q.options.forEach((opt, i) => text += `   ${i + 1}) ${opt}\n`);
+                } else if (q.type === 'tf') {
+                    text += `   참 / 거짓\n`;
+                }
+                text += `\n`;
+            });
+
+            text += `\n${'='.repeat(50)}\n정답\n${'='.repeat(50)}\n`;
+            examQuestions.forEach((q, idx) => {
+                let ans = '';
+                if (q.type === 'multiple') ans = `${q.answer + 1}번`;
+                else if (q.type === 'tf') ans = q.answer ? '참' : '거짓';
+                else ans = q.answer;
+                text += `${idx + 1}. ${ans} - ${q.explanation}\n\n`;
+            });
+
+            downloadAsText(text, `맨큐경제학_모의시험_${new Date().toISOString().slice(0, 10)}.txt`);
+            showToast('시험 파일이 다운로드되었습니다.', 'success');
+        }
+    </script>
+</body>
+
+</html>

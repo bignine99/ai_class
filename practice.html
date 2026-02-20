@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="맨큐의 경제학 - 연습문제 풀기. 챕터별 문제를 풀고 실력을 확인하세요.">
+  <title>연습문제 풀기 | 맨큐의 경제학</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function () {
+      const t = localStorage.getItem('mankiw_theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="main-content">
+    <div class="page-container">
+      <div class="page-header">
+        <h1>연습 문제 풀기</h1>
+        <p>각 챕터별 연습문제를 풀어보고 해설을 확인하세요</p>
+      </div>
+
+      <div class="two-column-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="sidebar-title">챕터 선택</div>
+          <div class="chapter-list" id="chapterSidebar"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-panel" id="contentPanel">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-state-icon">—</div>
+            <div class="empty-state-title">챕터를 선택하세요</div>
+            <div class="empty-state-desc">왼쪽에서 챕터를 선택하면 해당 챕터의 연습문제가 표시됩니다.</div>
+          </div>
+          <div id="practiceContent" class="hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/key_manager.js"></script>
+  <script src="js/rag_client.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // Navbar & Footer are handled by common.js automatically
+
+    let currentChapter = null;
+    let answers = {};
+    let submitted = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize Sidebar
+      if (typeof createChapterSidebar === 'function') {
+        createChapterSidebar('chapterSidebar', handleChapterSelect, currentChapter);
+      } else {
+        console.error('createChapterSidebar function missing');
+      }
+
+      // Check URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const chParam = urlParams.get('chapter');
+      if (chParam) {
+        const chId = parseInt(chParam);
+        if (!isNaN(chId)) {
+          handleChapterSelect(chId);
+        } else {
+          handleChapterSelect(1); // Default to Ch.1 if chapter param is invalid
+        }
+      } else {
+        handleChapterSelect(1); // Default to Ch.1 if no chapter param
+      }
+    });
+
+    function handleChapterSelect(chapterId) {
+      currentChapter = chapterId;
+      answers = {};
+      submitted = false;
+
+      // Update sidebar
+      document.querySelectorAll('#chapterSidebar button').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.chapter) === chapterId);
+      });
+
+      const chapter = getChapter(chapterId);
+      const questions = PRACTICE_QUESTIONS[chapterId];
+
+      document.getElementById('emptyState').classList.add('hidden');
+      const contentDiv = document.getElementById('practiceContent');
+      contentDiv.classList.remove('hidden');
+
+      if (!questions || questions.length === 0) {
+        contentDiv.innerHTML = `
+          <div style="margin-bottom: 1.5rem;">
+            <h2>Chapter ${chapter.id}. ${chapter.title}</h2>
+            <p style="color: var(--text-tertiary); font-size: 0.9rem;">Part ${chapter.partId}. ${chapter.partTitle}</p>
+          </div>
+          <div class="empty-state">
+            <div class="empty-state-icon">—</div>
+            <div class="empty-state-title">준비 중인 문제입니다</div>
+            <div class="empty-state-desc">이 챕터의 연습문제는 현재 준비 중입니다. 다른 챕터의 문제를 먼저 풀어보세요.</div>
+          </div>
+        `;
+        return;
+      }
+
+      contentDiv.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+          <div>
+            <h2>Chapter ${chapter.id}. ${chapter.title}</h2>
+            <p style="color: var(--text-tertiary); font-size: 0.9rem;">
+              Part ${chapter.partId}. ${chapter.partTitle} · ${questions.length}문제
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="handleChapterSelect(${chapterId})">초기화</button>
+          </div>
+        </div>
+        
+        <div class="progress-bar mb-2">
+          <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem;" id="progressText">
+          0 / ${questions.length} 답변 완료
+        </div>
+
+        <div id="questionsContainer">
+          ${questions.map((q, idx) => renderQuestion(q, idx)).join('')}
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+          <button class="btn btn-primary btn-lg" id="submitBtn" onclick="submitAnswers()" disabled>
+            답안 제출하기
+          </button>
+        </div>
+
+        <div id="scoreDisplay" class="hidden"></div>
+      `;
+    }
+
+    function renderQuestion(q, index) {
+      const typeLabels = { multiple: '객관식', tf: '참/거짓', short: '단답형', essay: '서술형' };
+
+      let body = '';
+      if (q.type === 'multiple') {
+        const markers = ['①', '②', '③', '④', '⑤'];
+        body = `
+          <div class="answer-options" id="options-${q.id}">
+            ${q.options.map((opt, i) => `
+              <div class="answer-option" data-qid="${q.id}" data-value="${i}" onclick="selectAnswer(${q.id}, ${i}, 'multiple')">
+                <span class="answer-option-marker">${markers[i]}</span>
+                <span>${opt}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (q.type === 'tf') {
+        body = `
+          <div class="answer-options" id="options-${q.id}" style="flex-direction: row; gap: 12px;">
+            <div class="answer-option" data-qid="${q.id}" data-value="true" onclick="selectAnswer(${q.id}, true, 'tf')" style="flex: 1; justify-content: center;">
+              <span style="font-size: 1.1rem; font-weight: 700;">O</span>
+              <span>참 (True)</span>
+            </div>
+            <div class="answer-option" data-qid="${q.id}" data-value="false" onclick="selectAnswer(${q.id}, false, 'tf')" style="flex: 1; justify-content: center;">
+              <span style="font-size: 1.1rem; font-weight: 700;">X</span>
+              <span>거짓 (False)</span>
+            </div>
+          </div>
+        `;
+      } else if (q.type === 'short') {
+        body = `
+          <div style="margin-top: 0.5rem;">
+            <input type="text" class="form-input" id="short-${q.id}" placeholder="답을 입력하세요" 
+              oninput="selectAnswer(${q.id}, this.value, 'short')" style="max-width: 400px;">
+          </div>
+        `;
+      }
+
+      return `
+        <div class="question-card" id="question-${q.id}">
+          <div class="question-header">
+            <div class="question-number">${index + 1}</div>
+            <span class="question-type ${q.type}">${typeLabels[q.type]}</span>
+          </div>
+          <div class="question-text">${q.question}</div>
+          ${body}
+          <div id="result-${q.id}" class="hidden"></div>
+        </div>
+      `;
+    }
+
+    function selectAnswer(qId, value, type) {
+      if (submitted) return;
+      answers[qId] = { value, type };
+
+      // Update visual selection
+      if (type === 'multiple' || type === 'tf') {
+        const options = document.querySelectorAll(`[data-qid="${qId}"]`);
+        options.forEach(opt => {
+          opt.classList.toggle('selected', String(opt.dataset.value) === String(value));
+        });
+      }
+
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const questions = PRACTICE_QUESTIONS[currentChapter] || [];
+      const total = questions.length;
+      const answered = Object.keys(answers).length;
+      const pct = total > 0 ? (answered / total) * 100 : 0;
+
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressText').textContent = `${answered} / ${total} 답변 완료`;
+      document.getElementById('submitBtn').disabled = answered < total;
+    }
+
+    function submitAnswers() {
+      if (submitted) return;
+      submitted = true;
+
+      const questions = PRACTICE_QUESTIONS[currentChapter];
+      let correct = 0;
+
+      questions.forEach(q => {
+        const userAnswer = answers[q.id];
+        const resultDiv = document.getElementById(`result-${q.id}`);
+        resultDiv.classList.remove('hidden');
+
+        let isCorrect = false;
+        if (q.type === 'multiple') {
+          isCorrect = userAnswer && userAnswer.value === q.answer;
+        } else if (q.type === 'tf') {
+          isCorrect = userAnswer && userAnswer.value === q.answer;
+        } else if (q.type === 'short') {
+          isCorrect = userAnswer && userAnswer.value.trim() === q.answer;
+        }
+
+        if (isCorrect) correct++;
+
+        // Mark options
+        if (q.type === 'multiple') {
+          const options = document.querySelectorAll(`[data-qid="${q.id}"]`);
+          options.forEach((opt, i) => {
+            opt.classList.remove('selected');
+            if (i === q.answer) opt.classList.add('correct');
+            else if (userAnswer && i === userAnswer.value && !isCorrect) opt.classList.add('wrong');
+          });
+        } else if (q.type === 'tf') {
+          const options = document.querySelectorAll(`[data-qid="${q.id}"]`);
+          options.forEach(opt => {
+            opt.classList.remove('selected');
+            if (String(opt.dataset.value) === String(q.answer)) opt.classList.add('correct');
+            else if (userAnswer && String(opt.dataset.value) === String(userAnswer.value) && !isCorrect) opt.classList.add('wrong');
+          });
+        }
+
+        resultDiv.innerHTML = `
+          <div class="result-box ${isCorrect ? 'correct' : 'incorrect'}">
+            <strong>${isCorrect ? 'CORRECT — 정답!' : 'WRONG — 오답'}</strong>
+            ${q.type === 'short' ? `<br>정답: <strong>${q.answer}</strong>` : ''}
+            <br><br>${q.explanation}
+          </div>
+        `;
+      });
+
+      // Show score
+      const total = questions.length;
+      const pct = Math.round((correct / total) * 100);
+      const scoreDiv = document.getElementById('scoreDisplay');
+      scoreDiv.classList.remove('hidden');
+      scoreDiv.innerHTML = `
+        <div class="score-display">
+          <div class="score-circle" style="--score-deg: ${(pct / 100) * 360}deg;">
+            <div class="score-value">${pct}%</div>
+            <div class="score-total">${correct} / ${total}</div>
+          </div>
+          <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
+            ${pct >= 80 ? '훌륭합니다!' : pct >= 60 ? '잘 했습니다!' : '더 복습이 필요합니다'}
+          </div>
+          <p style="color: var(--text-tertiary); margin-bottom: 1rem;">
+            ${total}문제 중 ${correct}문제를 맞추셨습니다.
+          </p>
+          <button class="btn btn-primary" onclick="handleChapterSelect(${currentChapter})">다시 풀기</button>
+        </div>
+      `;
+
+      // Scroll to score
+      scoreDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Disable submit
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('submitBtn').textContent = '제출 완료';
+    }
+  </script>
+</body>
+
+</html>

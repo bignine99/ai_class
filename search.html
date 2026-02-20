@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="맨큐의 경제학 - 교과서 자료 찾기. 챕터별 핵심 개념과 내용을 탐색하세요.">
+  <title>교과서 자료 찾기 | 맨큐의 경제학</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function () {
+      const t = localStorage.getItem('mankiw_theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="main-content">
+    <div class="page-container">
+      <div class="page-header">
+        <h1>교과서 자료 찾기</h1>
+        <p>챕터별 핵심 개념, 키워드, 요약을 탐색하고 검색하세요</p>
+      </div>
+
+      <!-- Search -->
+      <div class="search-box" style="max-width: 600px;">
+        <span class="search-box-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg></span>
+        <input type="text" id="searchInput" placeholder="키워드, 개념, 챕터명으로 검색 (예: 수요, GDP, 독점...)" autofocus>
+      </div>
+
+      <!-- Layout -->
+      <div class="two-column-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="sidebar-title">목차</div>
+          <div class="chapter-list" id="chapterSidebar"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-panel" id="contentPanel">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-state-icon">—</div>
+            <div class="empty-state-title">챕터를 선택하세요</div>
+            <div class="empty-state-desc">왼쪽 목차에서 챕터를 선택하거나, 검색란에 키워드를 입력하여 관련 내용을 찾아보세요.</div>
+          </div>
+          <div id="chapterContent" class="hidden"></div>
+          <div id="searchResults" class="hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/key_manager.js"></script>
+  <script src="js/rag_client.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // Navbar & Footer handled automatically by common.js
+
+    let currentChapter = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Build sidebar
+      if (typeof createChapterSidebar === 'function') {
+        createChapterSidebar('chapterSidebar', handleChapterSelect, currentChapter);
+      }
+
+      // Check URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const chParam = urlParams.get('chapter');
+      if (chParam) {
+        handleChapterSelect(parseInt(chParam));
+      } else {
+        // Default to Chapter 1
+        handleChapterSelect(1);
+      }
+    });
+
+    function handleChapterSelect(chapterId) {
+      currentChapter = chapterId;
+      const chapter = getChapter(chapterId);
+      if (!chapter) return;
+
+      // Update sidebar active state
+      document.querySelectorAll('#chapterSidebar button').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.chapter) === chapterId);
+      });
+
+      // Show chapter content
+      document.getElementById('emptyState').classList.add('hidden');
+      document.getElementById('searchResults').classList.add('hidden');
+      const contentDiv = document.getElementById('chapterContent');
+      contentDiv.classList.remove('hidden');
+
+      contentDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-family: 'Inter', monospace;">
+            Part ${chapter.partId} · Chapter ${chapter.id}
+          </span>
+          <span class="tag tag-blue">${chapter.pages}쪽</span>
+        </div>
+        <h2>${chapter.title}</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.7;">${chapter.summary}</p>
+        
+        <h3>핵심 키워드</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem;">
+          ${chapter.keywords.map(k => `<span class="tag tag-blue">${k}</span>`).join('')}
+        </div>
+
+        ${chapter.concepts && chapter.concepts.length > 0 ? `
+          <h3>주요 개념</h3>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem;">
+            ${chapter.concepts.map(c => `
+              <div style="background: var(--bg-tertiary); border-left: 3px solid var(--primary-500); padding: 12px 16px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
+                <div style="font-weight: 600; font-size: 0.95rem; color: var(--primary-400); margin-bottom: 4px;">${c.name}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">${c.desc}</div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <div style="display: flex; gap: 10px; margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+          <a href="practice.html?chapter=${chapter.id}" class="btn btn-primary">연습문제 풀기</a>
+          <a href="lecture.html?chapter=${chapter.id}" class="btn btn-secondary">강의자료 만들기</a>
+          <button onclick="printContent('chapterContent')" class="btn btn-ghost">인쇄</button>
+        </div>
+      `;
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', debounce(function () {
+      const query = this.value.trim();
+      if (!query) {
+        document.getElementById('searchResults').classList.add('hidden');
+        if (currentChapter) {
+          document.getElementById('chapterContent').classList.remove('hidden');
+        } else {
+          document.getElementById('emptyState').classList.remove('hidden');
+        }
+        return;
+      }
+
+      const results = searchChapters(query);
+      document.getElementById('emptyState').classList.add('hidden');
+      document.getElementById('chapterContent').classList.add('hidden');
+      const resultsDiv = document.getElementById('searchResults');
+      resultsDiv.classList.remove('hidden');
+
+      if (results.length === 0) {
+        resultsDiv.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">—</div>
+            <div class="empty-state-title">"${escapeHtml(query)}"에 대한 결과가 없습니다</div>
+            <div class="empty-state-desc">다른 키워드로 검색해보세요.</div>
+          </div>
+        `;
+        return;
+      }
+
+      resultsDiv.innerHTML = `
+        <div style="margin-bottom: 1rem; color: var(--text-tertiary); font-size: 0.85rem;">
+          "${escapeHtml(query)}" 검색 결과: <strong style="color: var(--primary-400);">${results.length}개</strong> 챕터
+        </div>
+        ${results.map(ch => `
+          <div class="question-card" style="cursor: pointer;" onclick="handleChapterSelect(${ch.id}); document.getElementById('searchInput').value = '';">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <span class="question-number">${String(ch.id).padStart(2, '0')}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Part ${ch.partId}. ${ch.partTitle}</span>
+              <span class="tag tag-blue" style="margin-left: auto;">${ch.pages}쪽</span>
+            </div>
+            <div style="font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">${ch.title}</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">${ch.summary}</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              ${ch.keywords.slice(0, 6).map(k => {
+        const isMatch = k.toLowerCase().includes(query.toLowerCase());
+        return `<span class="tag ${isMatch ? 'tag-amber' : 'tag-blue'}" style="font-size: 0.7rem;">${k}</span>`;
+      }).join('')}
+              ${ch.keywords.length > 6 ? `<span class="tag tag-blue" style="font-size: 0.7rem;">+${ch.keywords.length - 6}</span>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      `;
+    }, 200));
+  </script>
+</body>
+
+</html>

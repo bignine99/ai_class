@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassAI - PDF to Intelligent Courseware</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Inline Tweaks */
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .navbar-landing {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            background: var(--bg-overlay);
+            /* Variable for theme support */
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-subtle);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-logo span {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-item:hover {
+            color: var(--accent-primary);
+        }
+
+        .nav-btn {
+            padding: 10px 24px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            color: var(--text-main);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-primary);
+        }
+
+        /* Scroll Animation Utility */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Light Mode Overrides for specific elements in HTML */
+        [data-theme="light"] .navbar-landing {
+            background: rgba(255, 255, 255, 0.85);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar-landing">
+        <a href="#" class="brand-logo" style="flex-direction:column; align-items:flex-start; gap:4px; line-height:1;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fa-solid fa-layer-group" style="font-size:1.3rem; color:var(--accent-primary)"></i>
+                <span class="dynamic-green" style="font-size:1.5rem; letter-spacing:-0.03em;">Class AI</span>
+            </div>
+            <span
+                style="font-size:0.7rem; color:var(--text-muted); font-weight:500; letter-spacing:0.02em; margin-left:34px;">powered
+                by Ninetynine Inc.</span>
+        </a>
+        <div class="nav-menu">
+            <a href="#features" class="nav-item">Features</a>
+            <a href="#process" class="nav-item">How it Works</a>
+            <a href="#pricing" class="nav-item">Pricing</a>
+        </div>
+        <div class="nav-actions" style="display:flex; gap:10px; align-items:center;">
+            <button class="theme-toggle" id="themeToggle" onclick="ThemeManager.toggle()"
+                style="background:none; border:none; color:var(--text-main); font-size:1.2rem; cursor:pointer; padding:5px;">☀</button>
+            <a href="index.html" class="nav-btn">Live Demo</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="landing-hero">
+        <div class="landing-container">
+            <div class="landing-badge reveal">
+                <span class="pulse-dot"></span>
+                <span>Now Available for Educators</span>
+            </div>
+
+            <h1 class="landing-title reveal" style="transition-delay: 0.1s">
+                강의 자료만 업로드하세요.<br>
+                <span class="dynamic-green">AI가 완벽한 교육 플랫폼</span>을 만듭니다.
+            </h1>
+
+            <p class="landing-subtitle reveal" style="transition-delay: 0.2s">
+                PDF 파일 하나로 자료 검색, 연습문제, 시험 출제, 강의 노트, 리포트 가이드까지.<br>
+                ClassAI의 RAG 엔진이 당신의 강의를 지능형 학습 플랫폼으로 변환합니다.
+            </p>
+
+            <div class="landing-actions reveal" style="transition-delay: 0.3s">
+                <a href="index.html" class="btn-primary-lg">무료로 시작하기</a>
+                <a href="index.html" class="btn-secondary-lg"><i class="fa-solid fa-play"
+                        style="margin-right:8px;font-size:0.8em"></i> 데모 보기 (맨큐의 경제학)</a>
+            </div>
+
+            <!-- Dashboard Mockup -->
+            <div class="hero-visual-container reveal" style="transition-delay: 0.4s">
+                <div class="hero-dashboard-mockup">
+                    <div class="mockup-bar">
+                        <div class="mockup-dot dot-red"></div>
+                        <div class="mockup-dot dot-yellow"></div>
+                        <div class="mockup-dot dot-green"></div>
+                    </div>
+                    <div class="mockup-screen">
+                        <!-- Placeholder for Dashboard Image or Iframe -->
+                        <div class="mockup-bg">
+                            <div class="mockup-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                            <div class="mockup-text">Generating Courseware...</div>
+
+                            <!-- Floating Elements Animation -->
+                            <div class="float-card delay-0">
+                                <i class="fa-solid fa-file-pdf" style="color:#ef4444; margin-right:8px"></i>
+                                Lecture_Ch1.pdf
+                            </div>
+                            <div class="float-card delay-2">
+                                <i class="fa-solid fa-check-circle"
+                                    style="color:var(--accent-emerald); margin-right:8px"></i> Exam Generated
+                            </div>
+                            <div class="float-card delay-1">
+                                <i class="fa-solid fa-brain" style="color:var(--accent-violet); margin-right:8px"></i>
+                                Deep Search
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem / Solution Strip -->
+    <div
+        style="background:var(--bg-surface); padding: 80px 0; border-top:1px solid var(--border-subtle); border-bottom:1px solid var(--border-subtle); text-align:center;">
+        <div class="landing-container">
+            <p style="font-size:1.2rem; color:var(--text-secondary); margin-bottom:40px;">미래 교육을 선도할 대학과 교육기관, 이제
+                ClassAI와 함께 혁신을 시작하세요.</p>
+            <div class="logo-marquee-container">
+                <div class="logo-marquee-track">
+                    <!-- Org Logos (Duplicated for infinite loop) -->
+                    <div class="marquee-item"><i class="fa-brands fa-google"></i></div>
+                    <div class="marquee-item"><i class="fa-brands fa-microsoft"></i></div>
+                    <div class="marquee-item"><i class="fa-brands fa-aws"></i></div>
+                    <div class="marquee-item"><i class="fa-brands fa-apple"></i></div>
+                    <div class="marquee-item"><i class="fa-solid fa-building-columns"></i></div>
+                    <div class="marquee-item"><i class="fa-solid fa-school"></i></div>
+                    <div class="marquee-item"><i class="fa-solid fa-graduation-cap"></i></div>
+
+                    <!-- Duplicate for seamless loop -->
+                    <div class="marquee-item"><i class="fa-brands fa-google"></i></div>
+                    <div class="marquee-item"><i class="fa-brands fa-microsoft"></i></div>
+                    <div class="marquee-item"><i class="fa-brands fa-aws"></i></div>
+                    <div class="marquee-item"><i class="fa-brands fa-apple"></i></div>
+                    <div class="marquee-item"><i class="fa-solid fa-building-columns"></i></div>
+                    <div class="marquee-item"><i class="fa-solid fa-school"></i></div>
+                    <div class="marquee-item"><i class="fa-solid fa-graduation-cap"></i></div>
+                </div>
+                <div class="marquee-gradient-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="landing-section" id="features">
+        <div class="landing-container">
+            <div class="section-head reveal">
+                <span class="section-badge">All-in-One Platform</span>
+                <h2>교육의 모든 단계를<br>AI로 혁신하세요</h2>
+                <p>ClassAI는 단순한 자료실이 아닙니다. 학생과 교수 모두를 위한 지능형 학습 파트너입니다.</p>
+            </div>
+
+            <div class="feature-grid-alt">
+
+                <!-- Feature 1: Deep Search -->
+                <div class="feature-row reveal">
+                    <div class="feature-content">
+                        <div class="section-badge" style="color:var(--accent-primary)">Deep Search</div>
+                        <h3>맥락을 이해하는<br>심층 탐색 엔진</h3>
+                        <p>단순 키워드 검색을 넘어섭니다. RAG(Retrieval-Augmented Generation) 기술이 교재의 모든 내용을 벡터화하여, 학생의 질문에 정확한 출처와
+                            함께 답변합니다.</p>
+                        <div class="feature-check-list">
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 시맨틱 검색 (의미 기반 탐색)</div>
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 정확한 페이지/단락 출처 인용</div>
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 할루시네이션 최소화</div>
+                        </div>
+                    </div>
+                    <div class="feature-visual-box gradient-1">
+                        <div class="visual-content-mock">
+                            <!-- Abstract UI for Search -->
+                            <div class="mock-search-bar">
+                                <i class="fa-solid fa-magnifying-glass" style="color:var(--accent-primary)"></i>
+                                <span style="color:var(--text-secondary)">기회비용의 개념이 뭐야?</span>
+                            </div>
+                            <div class="mock-result-card"
+                                style="width:70%; margin-left:20%; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3)">
+                            </div>
+                            <div class="mock-result-card"
+                                style="width:70%; margin-left:20%; background:rgba(59,130,246,0.05)"></div>
+                            <div
+                                style="position:absolute; bottom:30px; left:30px; font-size:4rem; color:var(--accent-primary); opacity:0.1;">
+                                <i class="fa-solid fa-network-wired"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 2: Practice & Exam -->
+                <div class="feature-row reverse reveal">
+                    <div class="feature-content">
+                        <div class="section-badge" style="color:var(--accent-amber)">Auto Assessment</div>
+                        <h3>클릭 한 번으로<br>시험문제 출제 끝</h3>
+                        <p>강의 진도에 맞춰 연습문제, 퀴즈, 중간/기말 고사를 자동으로 생성합니다. 난이도 조절부터 자동 채점, 해설 제공까지 모든 과정이 자동화됩니다.</p>
+                        <div class="feature-check-list">
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 객관식/지문형/서술형 지원</div>
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 난이도별 (초급/중급/고급) 생성</div>
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 즉각적인 피드백 및 해설</div>
+                        </div>
+                    </div>
+                    <div class="feature-visual-box gradient-2">
+                        <div class="visual-content-mock">
+                            <i class="fa-solid fa-pen-to-square"
+                                style="font-size:5rem; color:var(--accent-amber); margin-bottom:20px;"></i>
+                            <div
+                                style="background:var(--bg-surface); padding:15px; border-radius:12px; border:1px solid var(--border-subtle); width:80%; text-align:center;">
+                                <div
+                                    style="height:10px; background:rgba(255,255,255,0.1); margin-bottom:10px; border-radius:4px;">
+                                </div>
+                                <div
+                                    style="height:10px; background:rgba(255,255,255,0.1); width:60%; margin:0 auto; border-radius:4px;">
+                                </div>
+                            </div>
+                            <div style="margin-top:15px; display:flex; gap:10px;">
+                                <span
+                                    style="padding:5px 10px; background:rgba(245,158,11,0.2); color:var(--accent-amber); border-radius:6px; font-size:0.8rem;">Q.
+                                    Quiz Generation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3: Lecture Prep -->
+                <div class="feature-row reveal">
+                    <div class="feature-content">
+                        <div class="section-badge" style="color:var(--accent-violet)">Lecture Assistant</div>
+                        <h3>수업 준비 시간을<br>절반으로 단축</h3>
+                        <p>PDF 교재를 분석하여 주차별 강의 노트, 수업 스크립트, 토론 주제를 제안합니다. 교수는 학생과의 상호작용에만 집중하세요.</p>
+                        <div class="feature-check-list">
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 강의 계획서(Syllabus) 자동 생성</div>
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 수업용 스크립트 및 핵심 요약</div>
+                            <div class="check-item"><span class="check-icon-circle"><i
+                                        class="fa-solid fa-check"></i></span> 토론 주제 및 사례 연구 제안</div>
+                        </div>
+                    </div>
+                    <div class="feature-visual-box gradient-3">
+                        <div class="visual-content-mock">
+                            <!-- Calendar / Schedule UI -->
+                            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; width:80%;">
+                                <div
+                                    style="background:rgba(139,92,246,0.2); aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                                    <span
+                                        style="font-size:1.5rem; font-weight:800; color:var(--accent-violet)">W1</span>
+                                    <span style="font-size:0.7rem; opacity:0.7">Intro</span>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.05); aspect-ratio:1; border-radius:12px;">
+                                </div>
+                                <div style="background:rgba(255,255,255,0.05); aspect-ratio:1; border-radius:12px;">
+                                </div>
+                                <div style="background:rgba(255,255,255,0.05); aspect-ratio:1; border-radius:12px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="process-section" id="process">
+        <div class="landing-container">
+            <div class="section-head reveal">
+                <span class="section-badge">Simple Workflow</span>
+                <h2>복잡한 설정 없이<br>3단계면 충분합니다</h2>
+            </div>
+
+            <div class="process-steps reveal">
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <div class="process-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <h3 class="process-title">PDF 업로드</h3>
+                    <p class="process-desc">가지고 계신 교재, 논문, 강의 자료(PDF)를 안전하게 업로드하세요. 대용량 파일도 지원합니다.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">02</div>
+                    <div class="process-icon"><i class="fa-solid fa-microchip"></i></div>
+                    <h3 class="process-title">AI 분석 & 벡터화</h3>
+                    <p class="process-desc">ClassAI 엔진이 텍스트를 추출하고 의미 단위로 분석하여 전용 지식 베이스(Vector DB)를 구축합니다.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">03</div>
+                    <div class="process-icon"><i class="fa-solid fa-rocket"></i></div>
+                    <h3 class="process-title">플랫폼 생성 완료</h3>
+                    <p class="process-desc">전용 웹사이트가 즉시 생성됩니다. 학생들에게 링크를 공유하고 바로 수업을 시작하세요.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="landing-cta">
+        <div class="landing-container">
+            <div class="cta-container reveal">
+                <h2 style="font-size:2.5rem; font-weight:800; margin-bottom:20px;">지금 바로 시작하세요</h2>
+                <p style="color:var(--text-secondary); margin-bottom:40px; font-size:1.1rem;">
+                    복잡한 LMS 구축 없이, 가장 진보된 AI 교육 환경을 경험해보세요.<br>
+                    데모 사이트를 통해 ClassAI의 강력함을 직접 확인하실 수 있습니다.
+                </p>
+                <div class="landing-actions" style="margin-bottom:0;">
+                    <a href="index.html" class="btn-primary-lg"
+                        style="background:white; color:var(--accent-primary)">무료로 시작하기</a>
+                    <a href="index.html" class="btn-secondary-lg">데모 사이트 방문</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer
+        style="border-top:1px solid var(--border-subtle); padding:60px 0; font-size:0.9rem; color:var(--text-muted);">
+        <div class="landing-container" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div class="brand-logo" style="margin-bottom:10px; font-size:1.2rem;">Class<span
+                        style="background:var(--text-muted); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">AI</span>
+                </div>
+                <p>© 2026 ClassAI Inc. All rights reserved.</p>
+            </div>
+            <div style="display:flex; gap:20px;">
+                <a href="#" style="color:var(--text-muted); text-decoration:none;">Privacy</a>
+                <a href="#" style="color:var(--text-muted); text-decoration:none;">Terms</a>
+                <a href="#" style="color:var(--text-muted); text-decoration:none;">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating AI Tutor Widget -->
+    <div id="aiTutorWidget" class="ai-tutor-widget">
+        <div class="ai-chat-window" id="aiChatWindow">
+            <div class="ai-chat-header">
+                <div class="ai-profile">
+                    <div class="ai-avatar">AI</div>
+                    <div class="ai-info">
+                        <span class="ai-name">ClassAI Tutor</span>
+                        <span class="ai-status">● Online</span>
+                    </div>
+                </div>
+                <button class="ai-close-btn" onclick="toggleAiChat()">×</button>
+            </div>
+            <div class="ai-chat-body">
+                <div class="chat-msg ai">
+                    안녕하세요! 무엇을 도와드릴까요?
+                    <br><span style="font-size:0.8em; opacity:0.7">예: "맨큐의 경제학 1장 요약해줘"</span>
+                </div>
+            </div>
+            <div class="ai-chat-input-area">
+                <input type="text" placeholder="질문을 입력하세요..." class="ai-input">
+                <button class="ai-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <div class="ai-tutor-hint">AI에게 질문해보세요! 👋</div>
+        <button class="ai-tutor-btn" onclick="toggleAiChat()">
+            <i class="fa-solid fa-robot"></i>
+            <span class="ai-badge">1</span>
+        </button>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        function toggleAiChat() {
+            const w = document.getElementById('aiChatWindow');
+            w.classList.toggle('active');
+            if (w.classList.contains('active')) {
+                document.querySelector('.ai-input').focus();
+            }
+        }
+
+        // Chat Logic
+        const chatInput = document.querySelector('.ai-input');
+        const sendBtn = document.querySelector('.ai-send-btn');
+        const chatBody = document.querySelector('.ai-chat-body');
+
+        function addMessage(text, isUser = false) {
+            const div = document.createElement('div');
+            div.className = `chat-msg ${isUser ? 'user' : 'ai'}`;
+            div.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+            if (isUser) {
+                div.style.background = 'var(--accent-primary)';
+                div.style.color = 'white';
+                div.style.borderTopRightRadius = '4px';
+            }
+            div.innerHTML = text;
+            chatBody.appendChild(div);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function getBotResponse(input) {
+            const text = input.toLowerCase();
+            if (text.includes('구조역학') || text.includes('전공') || text.includes('과목') || text.includes('수학')) {
+                return "네, 물론입니다! <b>구조역학</b>을 포함한 모든 이공계열 전공 서적과 강의 자료를 분석하여 요약, 문제 출제, 질의응답이 가능합니다.";
+            }
+            if (text.includes('가격') || text.includes('비용') || text.includes('얼마')) {
+                return "현재 교육기관을 대상으로 <b>무료 베타 테스트</b>를 진행 중입니다. 도입 문의를 남겨주시면 상세 안내해드리겠습니다.";
+            }
+            if (text.includes('안녕')) {
+                return "안녕하세요! ClassAI 튜터입니다. 궁금한 점이 있으신가요?";
+            }
+            if (text.includes('기능') || text.includes('뭐')) {
+                return "저는 강의 자료를 분석해 <b>시험 문제 생성, 요약 노트 작성, 실시간 Q&A</b> 등을 도와드릴 수 있습니다.";
+            }
+            return "좋은 질문이네요! 현재는 데모 버전이라 제한된 답변만 가능하지만, <b>Live Demo</b>를 통해 실제 RAG 엔진의 성능을 체험해보실 수 있습니다.";
+        }
+
+        function handleSend() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            chatInput.value = '';
+
+            // Simulate typing delay
+            setTimeout(() => {
+                const response = getBotResponse(text);
+                addMessage(response, false);
+            }, 800);
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+    </script>
+    <script>
+        // Simple Scroll Animation Observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+
+</html>

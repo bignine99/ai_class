@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mankiw's Economics | Premium Learning Platform</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // FOUC 방지 및 테마 초기화
+    (function () {
+      const t = localStorage.getItem('mankiw_theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+
+<body>
+  <!-- Dynamic Background Wrapper -->
+  <div class="aurora-bg">
+    <div class="aurora-blob blob-1"></div>
+    <div class="aurora-blob blob-2"></div>
+    <div class="aurora-blob blob-3"></div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- Hero Section: Immersive & Bold -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="badge-glass">
+          <span class="pulse-dot"></span> 2026학년도 1학기
+        </div>
+        <h1 class="hero-title">
+          Economics<br>
+          <span class="gradient-text-animated">Redefined.</span>
+        </h1>
+        <p class="hero-desc">
+          맨큐의 경제학 제10판 기반 학습 플랫폼.<br>
+          AI 심층 분석과 몰입형 학습 도구를 만나보세요.
+        </p>
+        <div class="hero-actions">
+          <a href="search.html" class="btn-glow">학습 시작하기</a>
+          <div class="hero-status">
+            <span class="status-value" data-count="36">0</span>
+            <span class="status-label">Chapters</span>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-status">
+            <span class="status-value" data-count="992">0</span>
+            <span class="status-label">Pages</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Textbook Cover Visual -->
+      <!-- Textbook Cover Visual (Clickable) -->
+      <div class="hero-visual">
+        <a href="https://product.kyobobook.co.kr/detail/S000215768656" target="_blank" class="book-link-wrapper"
+          title="교보문고에서 책 구매하기">
+          <div class="book-showcase">
+            <div class="book-glow"></div>
+            <div class="book-card">
+              <img src="img/textbook_cover.jpg" alt="맨큐의 경제학 제10판 - Principles of Economics 10th Edition"
+                class="book-cover-img">
+            </div>
+            <div class="book-reflection"></div>
+            <div class="book-info-badge">
+              <span class="edition-tag">10th Edition</span>
+              <span class="author-name">N. Gregory Mankiw</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         SYLLABUS SECTION
+         ══════════════════════════════════════ -->
+    <section class="syllabus-section" id="syllabus">
+      <div class="syllabus-header">
+        <div class="badge-glass"><span class="pulse-dot"></span> 2026학년도 강의계획서</div>
+        <h2 class="section-title">Course <span class="gradient-text-animated">Syllabus</span></h2>
+        <p style="color: var(--text-muted); font-size: 1.05rem; margin-top: 0.5rem;">
+          맨큐의 경제학 제10판 기반 · 주 2회 강의 · 전 15주 과정
+        </p>
+      </div>
+
+      <!-- Course Info Cards -->
+      <div class="syllabus-info-grid">
+        <div class="syl-info-card">
+          <div class="syl-info-icon"><i class="fa-solid fa-book-open" style="color:var(--accent-emerald)"></i></div>
+          <div class="syl-info-label">교재</div>
+          <div class="syl-info-value">맨큐의 경제학 제10판<br><span style="font-size:0.75rem;opacity:0.6">N. Gregory Mankiw /
+              이병락 역</span></div>
+        </div>
+        <div class="syl-info-card">
+          <div class="syl-info-icon"><i class="fa-solid fa-bullseye" style="color:var(--accent-rose)"></i></div>
+          <div class="syl-info-label">평가방법</div>
+          <div class="syl-info-value">중간 30% · 기말 30%<br>과제 20% · 참여 20%</div>
+        </div>
+        <div class="syl-info-card">
+          <div class="syl-info-icon"><i class="fa-regular fa-calendar-check" style="color:var(--accent-primary)"></i>
+          </div>
+          <div class="syl-info-label">강의시간</div>
+          <div class="syl-info-value">주 2회 (화·목)<br><span style="font-size:0.75rem;opacity:0.6">09:00 - 10:30
+              (90분)</span></div>
+        </div>
+        <div class="syl-info-card">
+          <div class="syl-info-icon"><i class="fa-solid fa-graduation-cap" style="color:var(--accent-violet)"></i></div>
+          <div class="syl-info-label">학점</div>
+          <div class="syl-info-value">각 학기 3학점<br><span style="font-size:0.75rem;opacity:0.6">전공필수</span></div>
+        </div>
+      </div>
+
+      <!-- Semester Tabs -->
+      <div class="semester-switcher">
+        <button class="semester-tab active" onclick="switchSemester(1, this)">
+          <span class="sem-num">1학기</span>
+          <span class="sem-name">미시경제학 Microeconomics</span>
+          <span class="sem-chapters">Ch.1 – 21</span>
+        </button>
+        <button class="semester-tab" onclick="switchSemester(2, this)">
+          <span class="sem-num">2학기</span>
+          <span class="sem-name">거시경제학 Macroeconomics</span>
+          <span class="sem-chapters">Ch.22 – 36</span>
+        </button>
+      </div>
+
+      <!-- Table Container -->
+      <div id="syllabusTableContainer"></div>
+    </section>
+
+    <!-- Bento Grid Navigation -->
+    <section class="bento-section">
+      <h2 class="section-label">LEARNING TOOLS</h2>
+      <div class="bento-grid">
+
+        <!-- Search: Main Large Card -->
+        <a href="search.html" class="bento-card card-large card-search spotlight" data-tilt>
+          <div class="card-bg-glow blue"></div>
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <div class="card-text">
+              <h3>Deep Search</h3>
+              <p>교과서의 모든 개념을 AI와 함께 탐색하세요.</p>
+            </div>
+            <div class="card-visual-decoration search-ui">
+              <div class="skeleton-line w-70"></div>
+              <div class="skeleton-line w-50"></div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Practice: Tall Card -->
+        <a href="practice.html" class="bento-card card-tall card-practice spotlight" data-tilt>
+          <div class="card-bg-glow emerald"></div>
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <div class="card-text">
+              <h3>Practice</h3>
+              <p>실전 연습문제</p>
+            </div>
+            <div class="progress-ring-mini">
+              <svg width="60" height="60">
+                <circle r="26" cx="30" cy="30" class="circle-bg" />
+                <circle r="26" cx="30" cy="30" class="circle-progress" />
+              </svg>
+              <span>GO</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Exam: Medium Card -->
+        <a href="exam.html" class="bento-card card-medium card-evaluations spotlight" data-tilt>
+          <div class="card-bg-glow amber"></div>
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div class="card-text">
+              <h3>Evaluations</h3>
+              <p>AI 자동 출제 및 채점</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- Custom Tools: Small Cards Group -->
+        <a href="lecture.html" class="bento-card card-small card-lecture spotlight" data-tilt>
+          <div class="card-bg-glow violet"></div>
+          <div class="card-content row">
+            <div class="card-icon-wrapper small">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3>Lecture Prep</h3>
+            </div>
+          </div>
+        </a>
+
+        <a href="report.html" class="bento-card card-small card-reporting spotlight" data-tilt>
+          <div class="card-bg-glow rose"></div>
+          <div class="card-content row">
+            <div class="card-icon-wrapper small">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <div>
+              <h3>Reporting</h3>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- Chapter Horizontal Scroll -->
+    <section class="section">
+      <div class="section-header-row">
+        <h2 class="section-title">Structure</h2>
+        <div class="scroll-controls">
+          <button class="scroll-btn prev">←</button>
+          <button class="scroll-btn next">→</button>
+        </div>
+      </div>
+      <div class="chapter-scroll-container" id="chapterOverview">
+        <!-- JS injected chapters -->
+      </div>
+    </section>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/key_manager.js"></script>
+  <script src="js/rag_client.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // Navbar & Footer handled automatically by common.js
+
+    // ══════════════════════════════════════
+    //  SYLLABUS DATA & RENDERING
+    // ══════════════════════════════════════
+    const METHOD_COLORS = {
+      '강의': { bg: 'rgba(59,130,246,0.12)', color: 'var(--accent-primary)', icon: '<i class="fa-solid fa-chalkboard-user"></i>' },
+      '토론': { bg: 'rgba(139,92,246,0.12)', color: 'var(--accent-violet)', icon: '<i class="fa-solid fa-comments"></i>' },
+      '발표': { bg: 'rgba(245,158,11,0.12)', color: 'var(--accent-amber)', icon: '<i class="fa-solid fa-presentation-screen"></i>' },
+      '실습': { bg: 'rgba(16,185,129,0.12)', color: 'var(--accent-emerald)', icon: '<i class="fa-solid fa-laptop-code"></i>' },
+      '시험': { bg: 'rgba(244,63,94,0.12)', color: 'var(--accent-rose)', icon: '<i class="fa-solid fa-pen-to-square"></i>' },
+      '사례분석': { bg: 'rgba(6,182,212,0.12)', color: '#06B6D4', icon: '<i class="fa-solid fa-chart-simple"></i>' },
+      '영상': { bg: 'rgba(251,146,60,0.12)', color: '#FB923C', icon: '<i class="fa-solid fa-film"></i>' },
+      '퀴즈': { bg: 'rgba(168,85,247,0.12)', color: '#A855F7', icon: '<i class="fa-solid fa-file-pen"></i>' }
+    };
+
+    const SYLLABUS = {
+      1: [
+        // Week 1
+        { w: 1, s: '1-1', topic: '오리엔테이션 & 경제학이란 무엇인가', ch: 1, methods: ['강의'], note: '교재·평가방법 안내', type: 'intro' },
+        { w: 1, s: '1-2', topic: '경제학의 10대 기본원리', ch: 1, methods: ['강의', '토론'], note: '기본원리 토론' },
+        // Week 2
+        { w: 2, s: '2-1', topic: '경제학자처럼 생각하기', ch: 2, methods: ['강의'], note: '과학적 방법론' },
+        { w: 2, s: '2-2', topic: '상호의존과 교역의 이익', ch: 3, methods: ['강의', '사례분석'], note: '한국 FTA 사례' },
+        // Week 3
+        { w: 3, s: '3-1', topic: '시장의 수요와 공급 (1): 기본 개념', ch: 4, methods: ['강의'], note: '' },
+        { w: 3, s: '3-2', topic: '시장의 수요와 공급 (2): 균형의 변동', ch: 4, methods: ['강의', '실습'], note: '수요공급 시뮬레이션' },
+        // Week 4
+        { w: 4, s: '4-1', topic: '탄력성과 그 응용', ch: 5, methods: ['강의', '실습'], note: '탄력성 계산 실습' },
+        { w: 4, s: '4-2', topic: '수요·공급의 정부정책: 가격통제와 조세', ch: 6, methods: ['강의', '토론'], note: '📋 과제1 제출' },
+        // Week 5
+        { w: 5, s: '5-1', topic: '소비자·생산자·시장의 효율성', ch: 7, methods: ['강의'], note: '' },
+        { w: 5, s: '5-2', topic: '조세의 경제적 비용', ch: 8, methods: ['강의', '사례분석'], note: '담배세·유류세 분석' },
+        // Week 6
+        { w: 6, s: '6-1', topic: '국제무역', ch: 9, methods: ['강의', '영상'], note: '다큐멘터리 시청' },
+        { w: 6, s: '6-2', topic: '외부효과', ch: 10, methods: ['강의', '토론'], note: '환경경제 사례토론' },
+        // Week 7
+        { w: 7, s: '7-1', topic: '공공재와 공유자원', ch: 11, methods: ['강의', '사례분석'], note: '' },
+        { w: 7, s: '7-2', topic: '조세제도의 설계', ch: 12, methods: ['강의', '토론'], note: '📋 과제2 제출' },
+        // Week 8 - Midterm
+        { w: 8, s: '8-1', topic: '중간고사', ch: null, methods: ['시험'], note: 'Ch.1-12 범위 필기시험', type: 'exam' },
+        { w: 8, s: '8-2', topic: '중간고사 해설 및 리뷰', ch: null, methods: ['강의'], note: '답안 해설·성적 피드백', type: 'review' },
+        // Week 9
+        { w: 9, s: '9-1', topic: '생산비용', ch: 13, methods: ['강의'], note: '비용곡선 분석' },
+        { w: 9, s: '9-2', topic: '경쟁시장의 기업', ch: 14, methods: ['강의', '실습'], note: '이윤극대화 시뮬레이션' },
+        // Week 10
+        { w: 10, s: '10-1', topic: '독점', ch: 15, methods: ['강의', '사례분석'], note: '플랫폼 독점 사례' },
+        { w: 10, s: '10-2', topic: '독점적 경쟁', ch: 16, methods: ['강의', '토론'], note: '브랜드 차별화 토론' },
+        // Week 11
+        { w: 11, s: '11-1', topic: '과점', ch: 17, methods: ['강의', '실습'], note: '게임이론 시뮬레이션' },
+        { w: 11, s: '11-2', topic: '생산요소시장의 경제학', ch: 18, methods: ['강의'], note: '📋 과제3 제출' },
+        // Week 12
+        { w: 12, s: '12-1', topic: '근로소득과 차별', ch: 19, methods: ['강의', '토론'], note: '성별임금격차 토론' },
+        { w: 12, s: '12-2', topic: '소득불평등과 빈곤', ch: 20, methods: ['사례분석', '토론'], note: '한국 불평등 현황' },
+        // Week 13
+        { w: 13, s: '13-1', topic: '소비자 선택 이론', ch: 21, methods: ['강의', '실습'], note: '효용극대화 실습' },
+        { w: 13, s: '13-2', topic: '미시경제학 종합정리', ch: null, methods: ['강의', '퀴즈'], note: '핵심개념 총정리 퀴즈', type: 'review' },
+        // Week 14 - Presentations
+        { w: 14, s: '14-1', topic: '조별 프로젝트 발표 (1)', ch: null, methods: ['발표', '토론'], note: '팀 1-5 발표', type: 'presentation' },
+        { w: 14, s: '14-2', topic: '조별 프로젝트 발표 (2) & 토론', ch: null, methods: ['발표', '토론'], note: '팀 6-10 발표', type: 'presentation' },
+        // Week 15 - Final
+        { w: 15, s: '15-1', topic: '기말고사 대비 총정리', ch: null, methods: ['강의'], note: '출제 범위·유형 안내', type: 'review' },
+        { w: 15, s: '15-2', topic: '기말고사', ch: null, methods: ['시험'], note: 'Ch.1-21 범위 필기시험', type: 'exam' }
+      ],
+      2: [
+        // Week 1
+        { w: 1, s: '1-1', topic: '거시경제학 개관 & 오리엔테이션', ch: null, methods: ['강의'], note: '1학기 핵심 복습', type: 'intro' },
+        { w: 1, s: '1-2', topic: '국민소득의 측정: GDP', ch: 22, methods: ['강의', '실습'], note: 'GDP 계산 실습' },
+        // Week 2
+        { w: 2, s: '2-1', topic: '생활비의 측정: CPI', ch: 23, methods: ['강의', '실습'], note: 'CPI 계산 실습' },
+        { w: 2, s: '2-2', topic: '생산과 성장', ch: 24, methods: ['강의', '사례분석'], note: '한국 성장요인 분석' },
+        // Week 3
+        { w: 3, s: '3-1', topic: '저축, 투자와 금융제도', ch: 25, methods: ['강의'], note: '' },
+        { w: 3, s: '3-2', topic: '금융시장의 기본 분석도구', ch: 26, methods: ['강의', '사례분석'], note: '주식시장 분석 사례' },
+        // Week 4
+        { w: 4, s: '4-1', topic: '실업', ch: 27, methods: ['강의', '토론'], note: '청년실업 현안 토론' },
+        { w: 4, s: '4-2', topic: '화폐제도', ch: 28, methods: ['강의', '영상'], note: '📋 과제1 제출' },
+        // Week 5
+        { w: 5, s: '5-1', topic: '화폐의 성장과 인플레이션', ch: 29, methods: ['강의'], note: '초인플레이션 사례' },
+        { w: 5, s: '5-2', topic: '개방경제의 거시경제학: 기본 개념', ch: 30, methods: ['강의', '실습'], note: '환율 데이터 분석' },
+        // Week 6
+        { w: 6, s: '6-1', topic: '개방경제의 거시경제 이론', ch: 31, methods: ['강의', '사례분석'], note: '외환위기 사례' },
+        { w: 6, s: '6-2', topic: '총수요와 총공급 (1): 기본 모형', ch: 32, methods: ['강의'], note: '' },
+        // Week 7
+        { w: 7, s: '7-1', topic: '총수요와 총공급 (2): 경기변동 분석', ch: 32, methods: ['사례분석', '토론'], note: '📋 과제2 제출' },
+        { w: 7, s: '7-2', topic: '통화·재정정책이 총수요에 미치는 영향', ch: 33, methods: ['강의', '토론'], note: '정책 효과 토론' },
+        // Week 8 - Midterm
+        { w: 8, s: '8-1', topic: '중간고사', ch: null, methods: ['시험'], note: 'Ch.22-33 범위 필기시험', type: 'exam' },
+        { w: 8, s: '8-2', topic: '중간고사 해설 및 경제지표 분석 실습', ch: null, methods: ['강의', '실습'], note: '답안 해설·지표 분석', type: 'review' },
+        // Week 9
+        { w: 9, s: '9-1', topic: '인플레이션과 실업의 상충관계 (1)', ch: 34, methods: ['강의'], note: '필립스 곡선 이론' },
+        { w: 9, s: '9-2', topic: '인플레이션과 실업의 상충관계 (2)', ch: 34, methods: ['실습', '사례분석'], note: '한국 데이터 분석' },
+        // Week 10
+        { w: 10, s: '10-1', topic: '거시경제정책의 다섯 가지 논쟁 (1)', ch: 35, methods: ['강의', '토론'], note: '정책 디베이트 준비' },
+        { w: 10, s: '10-2', topic: '거시경제정책의 다섯 가지 논쟁 (2)', ch: 35, methods: ['토론'], note: '찬반 디베이트', type: 'presentation' },
+        // Week 11
+        { w: 11, s: '11-1', topic: '경제학의 최전선: 행동경제학과 새 패러다임', ch: 36, methods: ['강의', '영상'], note: '📋 과제3 제출' },
+        { w: 11, s: '11-2', topic: '경제학의 최전선: 응용과 현실 사례', ch: 36, methods: ['사례분석', '토론'], note: '실생활 적용 토론' },
+        // Week 12
+        { w: 12, s: '12-1', topic: '한국 거시경제 현안 분석', ch: null, methods: ['토론', '실습'], note: '팀 프로젝트 중간점검', type: 'review' },
+        { w: 12, s: '12-2', topic: '글로벌 경제 이슈: 금융위기와 통화정책', ch: null, methods: ['강의', '영상', '토론'], note: '2008 금융위기 다큐' },
+        // Week 13
+        { w: 13, s: '13-1', topic: '거시경제학 종합정리 (1): 이론편', ch: null, methods: ['강의'], note: '핵심이론 총정리', type: 'review' },
+        { w: 13, s: '13-2', topic: '거시경제학 종합정리 (2): 응용편', ch: null, methods: ['실습', '퀴즈'], note: '종합 퀴즈', type: 'review' },
+        // Week 14 - Presentations
+        { w: 14, s: '14-1', topic: '조별 프로젝트 발표 (1)', ch: null, methods: ['발표', '토론'], note: '팀 1-5 발표', type: 'presentation' },
+        { w: 14, s: '14-2', topic: '조별 프로젝트 발표 (2) & 종합 토론', ch: null, methods: ['발표', '토론'], note: '팀 6-10·우수팀 시상', type: 'presentation' },
+        // Week 15 - Final
+        { w: 15, s: '15-1', topic: '기말고사 대비 총정리', ch: null, methods: ['강의'], note: '출제 범위·유형 안내', type: 'review' },
+        { w: 15, s: '15-2', topic: '기말고사', ch: null, methods: ['시험'], note: 'Ch.22-36 범위 필기시험', type: 'exam' }
+      ]
+    };
+
+    function renderMethodBadge(method) {
+      const m = METHOD_COLORS[method] || { bg: 'rgba(100,100,100,0.1)', color: 'var(--text-muted)', icon: '📌' };
+      return `<span class="method-badge" style="background:${m.bg};color:${m.color}">${m.icon} ${method}</span>`;
+    }
+
+    function renderSyllabus(sem) {
+      const data = SYLLABUS[sem];
+      if (!data) return;
+
+      let rows = '';
+      let prevWeek = 0;
+
+      data.forEach(s => {
+        const isNewWeek = s.w !== prevWeek;
+        prevWeek = s.w;
+
+        const rowType = s.type || 'normal';
+        const rowClass = rowType === 'exam' ? 'syl-row-exam' :
+          rowType === 'presentation' ? 'syl-row-present' :
+            rowType === 'review' ? 'syl-row-review' :
+              rowType === 'intro' ? 'syl-row-intro' : '';
+
+        const topicLink = s.ch
+          ? `<a href="lecture.html?chapter=${s.ch}" class="syl-topic-link">${s.topic}</a>`
+          : `<span class="syl-topic-text">${s.topic}</span>`;
+
+        const chapterTag = s.ch
+          ? `<span class="syl-ch-tag">Ch.${s.ch}</span>`
+          : `<span class="syl-ch-tag syl-ch-na">—</span>`;
+
+        const methodsHtml = s.methods.map(m => renderMethodBadge(m)).join(' ');
+
+        rows += `
+          <tr class="syl-row ${rowClass} ${isNewWeek ? 'syl-week-start' : ''}">
+            <td class="syl-td-week">${isNewWeek ? `<span class="syl-week-num">${s.w}</span>` : ''}</td>
+            <td class="syl-td-session"><span class="syl-session-badge">${s.s}</span></td>
+            <td class="syl-td-topic">${topicLink}</td>
+            <td class="syl-td-chapter">${chapterTag}</td>
+            <td class="syl-td-methods">${methodsHtml}</td>
+            <td class="syl-td-note">${s.note || ''}</td>
+          </tr>
+        `;
+      });
+
+      const semLabel = sem === 1 ? '1학기 미시경제학' : '2학기 거시경제학';
+
+      document.getElementById('syllabusTableContainer').innerHTML = `
+        <div class="syl-table-wrap">
+          <table class="syl-table">
+            <thead>
+              <tr>
+                <th class="syl-th" style="width:60px">주차</th>
+                <th class="syl-th" style="width:100px">차시</th>
+                <th class="syl-th">강의주제</th>
+                <th class="syl-th" style="width:70px">챕터</th>
+                <th class="syl-th" style="width:190px">강의방법</th>
+                <th class="syl-th" style="width:180px">비고</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function switchSemester(sem, btn) {
+      document.querySelectorAll('.semester-tab').forEach(t => t.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderSyllabus(sem);
+    }
+
+    // Initial render
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSyllabus(1);
+    });
+
+    // Chapter generation logic optimized for horizontal scroll
+    const container = document.getElementById('chapterOverview');
+    const colors = ['var(--blue-500)', 'var(--emerald-500)', 'var(--amber-500)', 'var(--violet-500)', 'var(--rose-500)'];
+
+    let html = '';
+    TEXTBOOK_DATA.parts.forEach((part, i) => {
+      html += `
+        <div class="part-column">
+            <div class="part-header">
+                <span class="part-id" style="color: ${colors[i % colors.length]}">PART ${part.id}</span>
+                <span class="part-text">${part.title}</span>
+            </div>
+            <div class="part-chapters">
+                ${part.chapters.map(ch => `
+                    <a href="search.html?chapter=${ch.id}" class="chapter-pill">
+                        <span class="ch-num">${String(ch.id).padStart(2, '0')}</span>
+                        <span class="ch-title">${ch.title}</span>
+                    </a>
+                `).join('')}
+            </div>
+        </div>
+        `;
+    });
+    container.innerHTML = html;
+
+    // Scroll buttons
+    document.querySelector('.scroll-btn.next').onclick = () => {
+      container.scrollBy({ left: 300, behavior: 'smooth' });
+    };
+    document.querySelector('.scroll-btn.prev').onclick = () => {
+      container.scrollBy({ left: -300, behavior: 'smooth' });
+    };
+
+    // Hero Count Up Animation
+    const counters = document.querySelectorAll('.status-value');
+    counters.forEach(counter => {
+      const target = +counter.getAttribute('data-count');
+      const duration = 2000;
+      const increment = target / (duration / 16);
+
+      let current = 0;
+      const updateCounter = () => {
+        current += increment;
+        if (current < target) {
+          counter.textContent = Math.ceil(current);
+          requestAnimationFrame(updateCounter);
+        } else {
+          counter.textContent = target;
+        }
+      };
+      updateCounter();
+    });
+  </script>
+</body>
+
+</html>
